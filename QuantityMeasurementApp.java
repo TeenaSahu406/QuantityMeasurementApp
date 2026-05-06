@@ -1,78 +1,69 @@
 public class QuantityMeasurementApp {
 
-    // Feet class
-    static class Feet {
-        private final double value;
+    // Step 1: Enum for units
+    enum LengthUnit {
+        FEET(1.0),
+        INCH(1.0 / 12.0); // 1 inch = 1/12 feet
 
-        public Feet(double value) {
-            this.value = value;
+        private final double conversionFactorToFeet;
+
+        LengthUnit(double factor) {
+            this.conversionFactorToFeet = factor;
         }
 
+        public double toFeet(double value) {
+            return value * conversionFactorToFeet;
+        }
+    }
+
+    // Step 2: Generic Quantity class
+    static class Quantity {
+        private final double value;
+        private final LengthUnit unit;
+
+        public Quantity(double value, LengthUnit unit) {
+            if (unit == null) {
+                throw new IllegalArgumentException("Unit cannot be null");
+            }
+            this.value = value;
+            this.unit = unit;
+        }
+
+        // Convert to base unit (feet)
+        private double toFeet() {
+            return unit.toFeet(value);
+        }
+
+        // Step 3: equals method with conversion
         @Override
         public boolean equals(Object obj) {
+
             if (this == obj) return true;
+
             if (obj == null || getClass() != obj.getClass()) return false;
 
-            Feet other = (Feet) obj;
-            return Double.compare(this.value, other.value) == 0;
+            Quantity other = (Quantity) obj;
+
+            // Compare after converting both to feet
+            return Double.compare(this.toFeet(), other.toFeet()) == 0;
         }
 
         @Override
         public int hashCode() {
-            return Double.hashCode(value);
+            return Double.hashCode(toFeet());
         }
-    }
-
-    // Inches class (same structure)
-    static class Inches {
-        private final double value;
-
-        public Inches(double value) {
-            this.value = value;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) return true;
-            if (obj == null || getClass() != obj.getClass()) return false;
-
-            Inches other = (Inches) obj;
-            return Double.compare(this.value, other.value) == 0;
-        }
-
-        @Override
-        public int hashCode() {
-            return Double.hashCode(value);
-        }
-    }
-
-    // Static method for Feet equality
-    public static boolean compareFeet(double val1, double val2) {
-        Feet f1 = new Feet(val1);
-        Feet f2 = new Feet(val2);
-        return f1.equals(f2);
-    }
-
-    // Static method for Inches equality
-    public static boolean compareInches(double val1, double val2) {
-        Inches i1 = new Inches(val1);
-        Inches i2 = new Inches(val2);
-        return i1.equals(i2);
     }
 
     public static void main(String[] args) {
 
-        // Hardcoded values (as per UC2 requirement)
-        double feet1 = 1.0;
-        double feet2 = 1.0;
+        Quantity q1 = new Quantity(1.0, LengthUnit.FEET);
+        Quantity q2 = new Quantity(12.0, LengthUnit.INCH);
 
-        double inch1 = 1.0;
-        double inch2 = 1.0;
+        System.out.println("Are equal? " + q1.equals(q2)); // true
 
-        boolean feetResult = compareFeet(feet1, feet2);
-        boolean inchResult = compareInches(inch1, inch2);
+        Quantity q3 = new Quantity(1.0, LengthUnit.INCH);
+        Quantity q4 = new Quantity(1.0, LengthUnit.INCH);
 
-        System.out.println("Feet equality: " + feetResult);
-        System.out.println("Inch equality: " + inchResult);
+        System.out.println("Are equal? " + q3.equals(q4)); // true
     }
 }
